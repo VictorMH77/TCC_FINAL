@@ -10,6 +10,7 @@ from email.utils import parsedate_to_datetime
 from bs4 import BeautifulSoup
 from email.header import decode_header
 import json
+from typing import List
 
 app = FastAPI()
 
@@ -126,8 +127,7 @@ def listar_pdfs():
     pdfs.append({"name": filename, "size": size, "data": creation_time})
 
   return pds'''
-
-
+''' #certo
 @app.get("/listar_pdfs")
 def listar_pdfs():
   pdf_directory = './arquivos'
@@ -163,6 +163,50 @@ def listar_pdfs():
   return pdfs
 '''
 
+
+@app.get("/listar_pdfs")
+def listar_pdfs():
+  pdf_directory = './arquivos'
+
+  entries = []
+
+  for filename in os.listdir(pdf_directory):
+    filepath = os.path.join(pdf_directory, filename)
+    size = os.path.getsize(filepath)
+    creation_time = datetime.utcfromtimestamp(os.path.getctime(filepath))
+
+    if filename.lower().endswith('.pdf'):
+      entry = {
+          "name": filename,
+          "size": size,
+          "data": creation_time,
+          "Data_email": None,
+          "Remetente": None,
+          "Destinatario": None,
+          "Assunto": None,
+          "Corpo": None
+      }
+
+      # Tente encontrar o arquivo JSON correspondente
+      json_filename = filename.replace('.pdf', '.json')
+      json_filepath = os.path.join(pdf_directory, json_filename)
+
+      if os.path.exists(json_filepath):
+        try:
+          with open(json_filepath, 'r', encoding='utf-8') as json_file:
+            json_content = json.load(json_file)
+
+          # Adicione as informações do JSON diretamente na entrada
+          entry.update(json_content)
+        except json.JSONDecodeError as e:
+          entry["error"] = f"Erro ao decodificar JSON: {e}"
+
+      entries.append(entry)
+
+  return {"dadosPDF": entries}
+
+
+'''
 @app.get("/listar_pdfs")
 def listar_pdfs():
     pdf_directory = './arquivos'
