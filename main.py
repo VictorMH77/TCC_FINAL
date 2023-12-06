@@ -166,44 +166,44 @@ def listar_pdfs():
 
 @app.get("/listar_pdfs")
 def listar_pdfs():
-  pdf_directory = './arquivos'
+    pdf_directory = './arquivos'
 
-  entries = []
+    entries = []
 
-  for filename in os.listdir(pdf_directory):
-    filepath = os.path.join(pdf_directory, filename)
-    size = os.path.getsize(filepath)
-    creation_time = datetime.utcfromtimestamp(os.path.getctime(filepath))
+    for filename in os.listdir(pdf_directory):
+        filepath = os.path.join(pdf_directory, filename)
+        size = os.path.getsize(filepath)
+        creation_time = datetime.utcfromtimestamp(os.path.getctime(filepath))
 
-    if filename.lower().endswith('.pdf'):
-      entry = {
-          "name": filename,
-          "size": size,
-          "data": creation_time,
-          "Data_email": None,
-          "Remetente": None,
-          "Destinatario": None,
-          "Assunto": None,
-          "Corpo": None
-      }
+        if filename.lower().endswith('.pdf'):
+            entry = {
+                "name": filename,
+                "size": size,
+                "data": creation_time,
+                "Data_email": None,
+                "Remetente": None,
+                "Destinatario": None,
+                "Assunto": None,
+                "Corpo": None
+            }
 
-      # Tente encontrar o arquivo JSON correspondente
-      json_filename = filename.replace('.pdf', '.json')
-      json_filepath = os.path.join(pdf_directory, json_filename)
+            # Tente encontrar o arquivo JSON correspondente
+            json_filename = filename.replace('.pdf', '.json')
+            json_filepath = os.path.join(pdf_directory, json_filename)
 
-      if os.path.exists(json_filepath):
-        try:
-          with open(json_filepath, 'r', encoding='utf-8') as json_file:
-            json_content = json.load(json_file)
+            if os.path.exists(json_filepath):
+                try:
+                    with open(json_filepath, 'r', encoding='utf-8') as json_file:
+                        json_content = json.load(json_file)
 
-          # Adicione as informações do JSON diretamente na entrada
-          entry.update(json_content)
-        except json.JSONDecodeError as e:
-          entry["error"] = f"Erro ao decodificar JSON: {e}"
+                    # Adicione as informações do JSON diretamente na entrada
+                    entry.update(json_content)
+                except json.JSONDecodeError as e:
+                    entry["error"] = f"Erro ao decodificar JSON: {e}"
 
-      entries.append(entry)
+            entries.append(entry)
 
-  return {"dadosPDF": entries}
+    return entries
 
 
 '''
