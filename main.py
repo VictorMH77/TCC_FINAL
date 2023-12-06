@@ -82,7 +82,7 @@ def extrair_pdf(emailUsuario: str, password: str, start_date: str,
         if part.get_content_type() == 'text/plain':
           email_data['Corpo'] += part.get_payload(decode=True).decode("utf-8")
         elif part.get_content_type() == 'text/html':
-          # Use BeautifulSoup para extrair o texto do HTML
+          # Usando BeautifulSoup para extrair o texto do HTML
           soup = BeautifulSoup(
               part.get_payload(decode=True).decode("utf-8"), "html.parser")
           email_data['Corpo'] += soup.get_text()
@@ -101,7 +101,6 @@ def extrair_pdf(emailUsuario: str, password: str, start_date: str,
           # Extraindo o nome do arquivo PDF do anexo
           filename = formatted_date + sender_name
 
-          # Substitua isso pelo diretório onde você quer armazenar os PDFs
           pdf_directory = './arquivos'
 
           # Salvar o anexo PDF
@@ -163,8 +162,8 @@ def listar_pdfs():
   return pdfs
 '''
 
-
-@app.get("/listar_pdfs")
+#!!!!CERTO!!!!!
+'''@app.get("/listar_pdfs")
 def listar_pdfs():
     pdf_directory = './arquivos'
 
@@ -203,7 +202,7 @@ def listar_pdfs():
 
             entries.append(entry)
 
-    return entries
+    return entries'''
 
 
 '''
@@ -254,11 +253,56 @@ def listar_pdfs():
 
     return {"pdfs": pdfs, "jsons": jsons}'''
 
+@app.get("/listar_pdfs")
+def listar_pdfs():
+    pdf_directory = './arquivos'
+
+    entries = []
+
+    for filename in sorted(os.listdir(pdf_directory)):
+        filepath = os.path.join(pdf_directory, filename)
+        size = os.path.getsize(filepath)
+        creation_time = datetime.utcfromtimestamp(os.path.getctime(filepath))
+
+        if filename.lower().endswith('.pdf'):
+            entry = {
+                "name": filename,
+                "size": size,
+                "data": creation_time,
+                "Data_email": None,
+                "Remetente": None,
+                "Destinatario": None,
+                "Assunto": None,
+                "Corpo": None
+            }
+
+            # Tente encontrar o arquivo JSON correspondente
+            json_filename = filename.replace('.pdf', '.json')
+            json_filepath = os.path.join(pdf_directory, json_filename)
+
+            if os.path.exists(json_filepath):
+                try:
+                    with open(json_filepath, 'r', encoding='utf-8') as json_file:
+                        json_content = json.load(json_file)
+
+                    # Adicione as informações do JSON diretamente na entrada
+                    entry.update(json_content)
+                except json.JSONDecodeError as e:
+                    entry["error"] = f"Erro ao decodificar JSON: {e}"
+
+            entries.append(entry)
+
+    # Ordenar a lista de dicionários com base na chave "name"
+    entries.sort(key=lambda x: x["data"])
+
+    return entries
+
 
 @app.get("/obter_pdf/{pdf_name}")
 def obter_pdf(pdf_name: str):
-  # Substitua isso pelo diretório onde você está armazenando os PDFs
   pdf_directory = './arquivos'
   return FileResponse(path=os.path.join(pdf_directory, pdf_name),
                       filename=pdf_name,
                       media_type="application/pdf")
+
+
