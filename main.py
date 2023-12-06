@@ -59,7 +59,7 @@ def extrair_pdf(emailUsuario: str, password: str, start_date: str,
                           for part in msg.walk())
 
     sender = msg['From']
-    match = re.search(r'<([^>]*)>', sender)
+    match = re.search(r'@(.+?)\.', sender)
     sender_name = match.group(1) if match else sender
 
     date_str = msg['Date']
@@ -125,7 +125,7 @@ def listar_pdfs():
     creation_time = datetime.utcfromtimestamp(os.path.getctime(filepath))
     pdfs.append({"name": filename, "size": size, "data": creation_time})
 
-  return pdfs'''
+  return pds'''
 
 
 @app.get("/listar_pdfs")
@@ -159,7 +159,8 @@ def listar_pdfs():
             "data": creation_time,
             "error": f"Erro ao decodificar JSON: {e}"
         })
-  return {"pdfs": pdfs, "jsons": jsons}
+  #return {"pdfs": pdfs, "jsons": jsons}
+  return pdfs
 '''
 
 @app.get("/listar_pdfs")
